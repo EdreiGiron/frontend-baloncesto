@@ -1,0 +1,92 @@
+<section class="console">
+  <h2>Control del Partido</h2>
+
+  <div class="grid">
+    <!-- Bloque reloj -->
+    <fieldset>
+      <legend>Reloj</legend>
+      <div class="clock">
+        <div class="time big">{{ timeLabel() }}</div>
+        <div class="buttons">
+          <button (click)="start()">Start</button>
+          <button (click)="pause()">Stop</button>
+          <button (click)="resetClock()">Reset</button>
+        </div>
+        <div class="row">
+          <label>Minutos por cuarto:
+            <input type="number" min="1" [(ngModel)]="minutes" />
+          </label>
+          <button (click)="setMinutes()">Aplicar</button>
+        </div>
+        <div class="row">
+          <button (click)="callTO('home',30)">Timeout L 30s ({{home().timeouts30}})</button>
+          <button (click)="callTO('home',60)">Timeout L 60s ({{home().timeouts60}})</button>
+          <button (click)="callTO('away',30)">Timeout V 30s ({{away().timeouts30}})</button>
+          <button (click)="callTO('away',60)">Timeout V 60s ({{away().timeouts60}})</button>
+          <span class="timeout" *ngIf="timeoutLabel()">En TO: {{ timeoutLabel() }}</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Bloque período / posesión -->
+    <fieldset>
+      <legend>Período / Posesión</legend>
+      <div class="row">
+        <div>Período: <strong>Q{{ quarter() }}</strong></div>
+        <button (click)="setQuarter(1)">Q1</button>
+        <button (click)="setQuarter(2)">Q2</button>
+        <button (click)="setQuarter(3)">Q3</button>
+        <button (click)="setQuarter(4)">Q4</button>
+        <button (click)="nextQuarter()">Siguiente</button>
+      </div>
+      <div class="row">
+        <span>Posesión:</span>
+        <button [class.sel]="possession()==='home'" (click)="setPos('home')">◀ Local</button>
+        <button (click)="setPos(null)">None</button>
+        <button [class.sel]="possession()==='away'" (click)="setPos('away')">Visita ▶</button>
+      </div>
+    </fieldset>
+
+    <!-- Bloque equipos -->
+    <fieldset>
+      <legend>Equipos</legend>
+      <div class="row">
+        <label>Local: <input #hn type="text" [value]="home().name" (change)="setNames(hn.value, an.value)" /></label>
+        <label>Visita: <input #an type="text" [value]="away().name" (change)="setNames(hn.value, an.value)" /></label>
+      </div>
+
+      <div class="score-grid">
+        <div class="team">
+          <h4>{{ home().name }} | Faltas: {{ home().fouls }} <span class="badge" [class.on]="bonusHome()">B</span></h4>
+          <div class="row">
+            <button class="neg" (click)="sub('home')">-1</button>
+            <div class="display">{{ home().score }}</div>
+            <button class="pos" (click)="add('home',1)">+1</button>
+          </div>
+          <div class="row">
+            <button class="pos" (click)="add('home',3)">+3</button>
+            <button class="pos" (click)="add('home',2)">+2</button>
+            <button (click)="foul('home')">Falta</button>
+          </div>
+        </div>
+
+        <div class="team">
+          <h4>{{ away().name }} | Faltas: {{ away().fouls }} <span class="badge" [class.on]="bonusAway()">B</span></h4>
+          <div class="row">
+            <button class="neg" (click)="sub('away')">-1</button>
+            <div class="display">{{ away().score }}</div>
+            <button class="pos" (click)="add('away',1)">+1</button>
+          </div>
+          <div class="row">
+            <button class="pos" (click)="add('away',3)">+3</button>
+            <button class="pos" (click)="add('away',2)">+2</button>
+            <button (click)="foul('away')">Falta</button>
+          </div>
+        </div>
+      </div>
+      <button (click)="resetFouls()">Reiniciar faltas</button>
+    </fieldset>
+
+    <button class="danger full" (click)="resetAll()">Reiniciar Partido</button>
+  </div>
+</section>

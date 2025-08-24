@@ -1,0 +1,5 @@
+.topbar {
+  display: flex; gap: 1rem; padding: .75rem 1rem; background: #0b132b; 
+  a { color: #e0e0e0; text-decoration: none; }
+  .active { font-weight: 700; color: #ffd166; }
+}
