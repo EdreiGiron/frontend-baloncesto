@@ -104,4 +104,13 @@
     <button class="danger full" (click)="resetAll()">Reiniciar Partido</button>
     <button (click)="saveGame()">Guardar partido</button>
   </div>
+  @if (showQuarterToast()) {
+  <div class="toast-qr">
+    <strong>
+      {{ endedQuarterCtl() === 4 ? 'Fin del partido' : ('Fin Q' + endedQuarterCtl()) }}
+    </strong>
+    <span> · Faltas reiniciadas</span>
+  </div>
+  }
+
 </section>

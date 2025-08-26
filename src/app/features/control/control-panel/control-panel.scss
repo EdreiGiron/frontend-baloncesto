@@ -24,3 +24,19 @@ button.full { width: 100%; }
   border-radius: .5rem;
   font-weight: 700;
 }
+
+.toast-qr {
+  position: fixed;
+  right: 16px; bottom: 16px; z-index: 40;
+  background: #0b132b; color: #e6edf3;
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  border-radius: 10px;
+  padding: .5rem .75rem;
+  font-size: .95rem;
+  animation: toastIn 180ms ease-out;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px) }
+  to { opacity: 1; transform: translateY(0) }
+}

@@ -1,4 +1,11 @@
 <section class="scoreboard">
+  @if (showQuarterBanner()) {
+  <div class="quarter-overlay">
+    <div class="card">
+      <div class="msg">{{ bannerText() }}</div>
+    </div>
+  </div>
+  }
   @if (timeoutLeftMs() > 0) {
   <div class="timeout-overlay">
     <div class="panel">

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, computed, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GameStore, TeamKey } from '../../../core/game-store';
 import { RealtimeService } from '../../../core/realtime.service';
@@ -30,7 +30,7 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
 
   minutes = 10;
 
-  private _lastQuarter = this.s.quarter(); 
+  private _lastQuarter = this.s.quarter();
 
   private quarterSyncEffect = effect(() => {
     const q = this.s.quarter();
@@ -91,5 +91,35 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
       possession: this.s.possession()
     };
     this.api.save(dto).subscribe(() => alert('Partido guardado'));
+
   }
+
+  showQuarterToast = signal(false);
+  endedQuarterCtl = signal<1 | 2 | 3 | 4>(1);
+
+  //CAMBIO DE Q1 A Q3 MANUAL O AUTO PARA MOSTRAR
+  private _prevQuarterCtl = this.s.quarter();
+  private quarterToastEffect = effect(() => {
+    const q = this.s.quarter();
+    const between = (q > this._prevQuarterCtl) && !this.s.running() && (this.s.getTimeLeftMs() === this.s.quarterDurationMs());
+    if (between) {
+      this.endedQuarterCtl.set(this._prevQuarterCtl as 1 | 2 | 3 | 4);
+      this.showQuarterToast.set(true);
+      setTimeout(() => this.showQuarterToast.set(false), 2200);
+    }
+    this._prevQuarterCtl = q;
+  });
+  // FIN DEL PARTIDO
+  private _prevTlCtl = this.s.getTimeLeftMs();
+  private finalToastEffect = effect(() => {
+    const tl = this.s.getTimeLeftMs();
+    const isEnd = this.s.quarter() === 4 && !this.s.running() && this._prevTlCtl > 0 && tl === 0;
+    if (isEnd) {
+      this.endedQuarterCtl.set(4);
+      this.showQuarterToast.set(true);
+      setTimeout(() => this.showQuarterToast.set(false), 2600);
+    }
+    this._prevTlCtl = tl;
+  });
+
 }
