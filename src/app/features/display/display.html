@@ -1,14 +1,15 @@
 <section class="scoreboard">
-  <!-- Overlay de TIME-OUT -->
-  <div class="timeout-overlay" *ngIf="timeoutLeftMs() > 0">
+  @if (timeoutLeftMs() > 0) {
+  <div class="timeout-overlay">
     <div class="panel">
       <div class="title">TIME-OUT</div>
       <div class="team">
-        {{ timeoutBy() === 'home' ? home().name : (timeoutBy() === 'away' ? away().name : '') }}
+        {{ timeoutBy() === 'home' ? homeName() : (timeoutBy() === 'away' ? awayName() : '') }}
       </div>
       <div class="clock">{{ timeoutLabel() }}</div>
     </div>
   </div>
+  }
 
   <header class="header">
     <div class="title">MARCADOR</div>

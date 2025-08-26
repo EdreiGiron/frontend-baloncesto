@@ -25,6 +25,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
   timeoutLabel = this.s.timeoutLabel;
   timeoutLeftMs = this.s.timeoutLeftMs;
   timeoutBy = this.s.timeoutBy;
+  
 
   homeName = computed(() => this.home().name?.trim() || 'LOCAL');
   awayName = computed(() => this.away().name?.trim() || 'VISITA');

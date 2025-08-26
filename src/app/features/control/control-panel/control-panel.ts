@@ -57,6 +57,7 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
 
   // --- Sync de Timeout cada 1s ---
   private timeoutSyncId: any = null;
+  
   private startTimeoutSync() {
     this.stopTimeoutSync();
     this.timeoutSyncId = setInterval(() => {

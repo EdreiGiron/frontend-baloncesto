@@ -12,13 +12,16 @@
           <button (click)="pause()">Pausa</button>
           <button (click)="resetClock()">Reiniciar</button>
         </div>
-        <div class="row" *ngIf="s.timeoutLeftMs() > 0">
+        @if (s.timeoutLeftMs() > 0) {
+        <div class="row">
           <strong>EN TIME-OUT:</strong>
           <span class="pill">
-            {{ s.timeoutBy() === 'home' ? home().name : (s.timeoutBy() === 'away' ? away().name : '') }}
+            {{ s.timeoutBy() === 'home' ? homeName() : (s.timeoutBy() === 'away' ? awayName() : '') }}
           </span>
           <span class="pill">{{ timeoutLabel() }}</span>
         </div>
+        }
+
 
         <div class="row">
           <label>Minutos por cuarto:
