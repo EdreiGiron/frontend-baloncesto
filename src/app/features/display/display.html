@@ -1,14 +1,24 @@
 <section class="scoreboard">
+  <!-- Overlay de TIME-OUT -->
+  <div class="timeout-overlay" *ngIf="timeoutLeftMs() > 0">
+    <div class="panel">
+      <div class="title">TIME-OUT</div>
+      <div class="team">
+        {{ timeoutBy() === 'home' ? home().name : (timeoutBy() === 'away' ? away().name : '') }}
+      </div>
+      <div class="clock">{{ timeoutLabel() }}</div>
+    </div>
+  </div>
+
   <header class="header">
-    <div class="title">THE NATIONAL CHAMPIONSHIP</div>
+    <div class="title">MARCADOR</div>
+
     <div class="timer">
       <span class="time">{{ timeLabel() }}</span>
       <span class="period">Q{{ quarter() }}</span>
       <span class="run" [class.playing]="running()">{{ running() ? '▶' : '⏸' }}</span>
-      <span class="timeout" *ngIf="timeoutLabel()">
-        TO: {{ timeoutLabel() }}
-      </span>
     </div>
+
   </header>
 
   <main class="panels">
@@ -24,7 +34,7 @@
     <div class="center">
       <div class="poss">
         <span class="arrow" [class.on]="possession()==='home'">◀</span>
-        <span class="label">POSSESSION</span>
+        <span class="label">POSESIÓN</span>
         <span class="arrow" [class.on]="possession()==='away'">▶</span>
       </div>
     </div>

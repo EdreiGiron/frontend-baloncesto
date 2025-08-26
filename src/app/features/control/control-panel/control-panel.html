@@ -8,10 +8,18 @@
       <div class="clock">
         <div class="time big">{{ timeLabel() }}</div>
         <div class="buttons">
-          <button (click)="start()">Start</button>
-          <button (click)="pause()">Stop</button>
-          <button (click)="resetClock()">Reset</button>
+          <button [disabled]="timeoutLabel()" (click)="start()">Inicio</button>
+          <button (click)="pause()">Pausa</button>
+          <button (click)="resetClock()">Reiniciar</button>
         </div>
+        <div class="row" *ngIf="s.timeoutLeftMs() > 0">
+          <strong>EN TIME-OUT:</strong>
+          <span class="pill">
+            {{ s.timeoutBy() === 'home' ? home().name : (s.timeoutBy() === 'away' ? away().name : '') }}
+          </span>
+          <span class="pill">{{ timeoutLabel() }}</span>
+        </div>
+
         <div class="row">
           <label>Minutos por cuarto:
             <input type="number" min="1" [(ngModel)]="minutes" />
@@ -19,12 +27,12 @@
           <button (click)="setMinutes()">Aplicar</button>
         </div>
         <div class="row">
-          <button (click)="callTO('home',30)">Timeout L 30s ({{home().timeouts30}})</button>
-          <button (click)="callTO('home',60)">Timeout L 60s ({{home().timeouts60}})</button>
-          <button (click)="callTO('away',30)">Timeout V 30s ({{away().timeouts30}})</button>
-          <button (click)="callTO('away',60)">Timeout V 60s ({{away().timeouts60}})</button>
-          <span class="timeout" *ngIf="timeoutLabel()">En TO: {{ timeoutLabel() }}</span>
+          <button (click)="callTO('home',30)">Timeout {{ homeName() }} 30s ({{home().timeouts30}})</button>
+          <button (click)="callTO('home',60)">Timeout {{ homeName() }} 60s ({{home().timeouts60}})</button>
+          <button (click)="callTO('away',30)">Timeout {{ awayName() }} 30s ({{away().timeouts30}})</button>
+          <button (click)="callTO('away',60)">Timeout {{ awayName() }} 60s ({{away().timeouts60}})</button>
         </div>
+
       </div>
     </fieldset>
 
@@ -41,10 +49,14 @@
       </div>
       <div class="row">
         <span>Posesión:</span>
-        <button [class.sel]="possession()==='home'" (click)="setPos('home')">◀ Local</button>
-        <button (click)="setPos(null)">None</button>
-        <button [class.sel]="possession()==='away'" (click)="setPos('away')">Visita ▶</button>
+        <button [class.sel]="possession()==='home'" (click)="setPos('home')">◀ {{ homeName() }}</button>
+        <button (click)="setPos(null)">Ninguna</button>
+        <button [class.sel]="possession()==='away'" (click)="setPos('away')">{{ awayName() }} ▶</button>
       </div>
+      <div class="row">
+        <strong>Período actual:</strong> Q{{ quarter() }}
+      </div>
+
     </fieldset>
 
     <!-- Bloque equipos -->
@@ -86,7 +98,7 @@
       </div>
       <button (click)="resetFouls()">Reiniciar faltas</button>
     </fieldset>
-
     <button class="danger full" (click)="resetAll()">Reiniciar Partido</button>
+    <button (click)="saveGame()">Guardar partido</button>
   </div>
 </section>

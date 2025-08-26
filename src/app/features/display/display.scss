@@ -27,3 +27,22 @@
 .center .poss { display: grid; gap: .25rem; place-items: center; }
 .center .label { font-weight: 800; letter-spacing: 1px; }
 .center .arrow { font-size: 2rem; opacity: .35; &.on { opacity: 1; color: #ffd166; } }
+
+.timeout-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: grid; place-items: center;
+  z-index: 50;
+
+  .panel {
+    background: #0b1a33;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    text-align: center;
+  }
+  .title { font-weight: 800; letter-spacing: 1px; color: #9fb3c8; margin-bottom: .25rem; }
+  .team  { font-size: 1.25rem; font-weight: 800; color: #e6edf3; margin-bottom: .25rem; }
+  .clock { font-size: 3rem; font-weight: 900; color: #ffd166; }
+}
+
