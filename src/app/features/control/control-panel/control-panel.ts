@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, computed, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GameStore, TeamKey } from '../../../core/game-store';
 import { RealtimeService } from '../../../core/realtime.service';
@@ -15,7 +15,7 @@ import { ApiService } from '../../../core/api.service';
 export class ControlPanelComponent implements OnInit, OnDestroy {
   public s = inject(GameStore);
 
-  constructor(private rt: RealtimeService, private api: ApiService) {}
+  constructor(private rt: RealtimeService, private api: ApiService) { }
 
   ngOnInit() { void this.rt.connect('http://localhost:5000'); }
   ngOnDestroy() { this.stopTimeoutSync(); void this.rt.disconnect(); }
@@ -30,38 +30,48 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
 
   minutes = 10;
 
+  private _lastQuarter = this.s.quarter(); 
+
+  private quarterSyncEffect = effect(() => {
+    const q = this.s.quarter();
+    if (q !== this._lastQuarter) {
+      this._lastQuarter = q;
+      void this.rt.pushState();
+    }
+  });
+
   // --- Acciones + push ---
   setNames(h: string, a: string) { this.s.setTeamName('home', h); this.s.setTeamName('away', a); void this.rt.pushState(); }
-  add(t: TeamKey, p: 1|2|3)      { this.s.addPoints(t, p);           void this.rt.pushState(); }
-  sub(t: TeamKey)                { this.s.removePoint(t);            void this.rt.pushState(); }
-  foul(t: TeamKey)               { this.s.addFoul(t);                void this.rt.pushState(); }
-  resetFouls()                   { this.s.resetFouls();              void this.rt.pushState(); }
+  add(t: TeamKey, p: 1 | 2 | 3) { this.s.addPoints(t, p); void this.rt.pushState(); }
+  sub(t: TeamKey) { this.s.removePoint(t); void this.rt.pushState(); }
+  foul(t: TeamKey) { this.s.addFoul(t); void this.rt.pushState(); }
+  resetFouls() { this.s.resetFouls(); void this.rt.pushState(); }
 
-  start()        { this.s.start();                  void this.rt.pushState(); }
-  pause()        { this.s.pause();                  void this.rt.pushState(); }
-  resetClock()   { this.s.resetClock();             void this.rt.pushState(); }
-  setMinutes()   { this.s.setQuarterMinutes(this.minutes); void this.rt.pushState(); }
+  start() { this.s.start(); void this.rt.pushState(); }
+  pause() { this.s.pause(); void this.rt.pushState(); }
+  resetClock() { this.s.resetClock(); void this.rt.pushState(); }
+  setMinutes() { this.s.setQuarterMinutes(this.minutes); void this.rt.pushState(); }
 
-  setQuarter(q: 1|2|3|4) { this.s.setQuarter(q);     void this.rt.pushState(); }
-  nextQuarter()          { this.s.nextQuarter();     void this.rt.pushState(); }
+  setQuarter(q: 1 | 2 | 3 | 4) { this.s.setQuarter(q); void this.rt.pushState(); }
+  nextQuarter() { this.s.nextQuarter(); void this.rt.pushState(); }
 
-  setPos(v: TeamKey | null)     { this.s.setPossession(v);           void this.rt.pushState(); }
+  setPos(v: TeamKey | null) { this.s.setPossession(v); void this.rt.pushState(); }
 
-  callTO(t: TeamKey, secs: 30|60) {
+  callTO(t: TeamKey, secs: 30 | 60) {
     this.s.callTimeout(t, secs);
-    void this.rt.pushState();   
-    this.startTimeoutSync();   
+    void this.rt.pushState();
+    this.startTimeoutSync();
   }
 
   resetAll() { this.s.resetAll(); void this.rt.pushState(); }
 
   // --- Sync de Timeout cada 1s ---
   private timeoutSyncId: any = null;
-  
+
   private startTimeoutSync() {
     this.stopTimeoutSync();
     this.timeoutSyncId = setInterval(() => {
-      void this.rt.pushState();          
+      void this.rt.pushState();
       if (this.s.timeoutLeftMs() <= 0) this.stopTimeoutSync();
     }, 1000);
   }

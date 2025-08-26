@@ -13,7 +13,7 @@ export class GameStore {
   readonly away = signal<TeamState>({ name: 'VISITA', score: 0, fouls: 0, timeouts30: 2, timeouts60: 2 });
 
   // === PARTIDO ===
-  readonly quarter = signal<1|2|3|4>(1);
+  readonly quarter = signal<1 | 2 | 3 | 4>(1);
   readonly quarterDurationMs = signal(10 * 60 * 1000);
   readonly timeLeftMs = signal(this.quarterDurationMs());
   readonly running = signal(false);
@@ -50,7 +50,7 @@ export class GameStore {
     const S = t === 'home' ? this.home : this.away;
     S.update(v => ({ ...v, name: name ?? '' }));
   }
-  addPoints(t: TeamKey, pts: 1|2|3) {
+  addPoints(t: TeamKey, pts: 1 | 2 | 3) {
     const S = t === 'home' ? this.home : this.away;
     S.update(v => ({ ...v, score: Math.max(0, v.score + pts) }));
   }
@@ -68,8 +68,15 @@ export class GameStore {
   }
 
   // ===== Cuartos / Reloj =====
-  setQuarter(q: 1|2|3|4) { this.quarter.set(q); this.resetClock(); }
-  nextQuarter() { if (this.quarter() < 4) this.setQuarter((this.quarter()+1) as 1|2|3|4); }
+  setQuarter(q: 1 | 2 | 3 | 4) { this.quarter.set(q); this.resetClock(); }
+  nextQuarter() {
+    const q = this.quarter();
+    if (q < 4) {
+      this.quarter.set((q + 1) as 1 | 2 | 3 | 4);
+      this.resetFouls();
+      this.resetClock(); 
+    }
+  }
 
   setQuarterMinutes(minutes: number) {
     const ms = Math.max(1, minutes) * 60 * 1000;
@@ -84,16 +91,29 @@ export class GameStore {
     this.clearGameTimer();
     this.gameInterval = setInterval(() => {
       const next = this.timeLeftMs() - 1000;
+
       if (next <= 0) {
         this.timeLeftMs.set(0);
         this.pause();
-      } else {
-        this.timeLeftMs.set(next);
+
+        const q = this.quarter();
+        if (q < 4) {
+
+          this.quarter.set((q + 1) as 1 | 2 | 3 | 4);
+          this.resetFouls();
+          this.timeLeftMs.set(this.quarterDurationMs());
+        } else {
+
+        }
+
+        return;
       }
+      this.timeLeftMs.set(next);
     }, 1000);
   }
 
-  pause() { this.stop(); }  
+
+  pause() { this.stop(); }
   resetClock() { this.stop(); this.timeLeftMs.set(this.quarterDurationMs()); }
 
   private stop() {
