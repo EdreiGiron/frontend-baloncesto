@@ -1,0 +1,34 @@
+<div class="list-container">
+  <h2>Jugadores</h2>
+  <button routerLink="/players/nuevo" class="btn-primary">➕ Agregar jugador</button>
+
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Número</th>
+        <th>Posición</th>
+        <th>Altura</th>
+        <th>Edad</th>
+        <th>Nacionalidad</th>
+        <th>EquipoId</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let j of jugadores">
+        <td>{{ j.fullName }}</td>
+        <td>{{ j.number }}</td>
+        <td>{{ j.position }}</td>
+        <td>{{ j.height }}</td>
+        <td>{{ j.age }}</td>
+        <td>{{ j.nationality }}</td>
+        <td>{{ j.teamId }}</td>
+        <td>
+          <button class="btn-small edit" (click)="editar(j.id!)">✏️ Editar</button>
+          <button class="btn-small delete" (click)="eliminar(j.id!)">🗑️ Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -21,6 +21,12 @@ export const routes: Routes = [
       import('./features/control/control-panel/control-panel')
         .then(m => m.ControlPanelComponent),
   },
+  {
+    path: 'players',
+    loadChildren: () =>
+      import('./features/players/players-module').then(m => m.PlayersModule),
+  },
 
-  { path: '**', redirectTo: 'login' },
+  // 👇 esta siempre va al final
+  { path: '**', redirectTo: 'display' },
 ];
