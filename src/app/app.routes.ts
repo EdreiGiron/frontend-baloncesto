@@ -1,7 +1,14 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'display', pathMatch: 'full' },
+
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
+
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login').then(m => m.LoginComponent),
+  },
 
   {
     path: 'display',
@@ -15,5 +22,5 @@ export const routes: Routes = [
         .then(m => m.ControlPanelComponent),
   },
 
-  { path: '**', redirectTo: 'display' },
+  { path: '**', redirectTo: 'login' },
 ];

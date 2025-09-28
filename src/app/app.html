@@ -1,7 +1,5 @@
-
-<nav class="topbar">
-  <a routerLink="/display" routerLinkActive="active">Tablero</a>
-  <a routerLink="/control" routerLinkActive="active">Control</a>
+<nav *ngIf="showNavbar" class="navbar">
+  <a routerLink="/display">Tablero</a>
+  <a routerLink="/control">Control</a>
 </nav>
-
-<router-outlet />
+<router-outlet></router-outlet>
