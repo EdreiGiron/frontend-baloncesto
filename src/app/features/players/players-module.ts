@@ -8,14 +8,11 @@ import { FormularioComponent } from './formulario/formulario';
 import { playersRoutes } from './players-routing-module';
 
 @NgModule({
-  declarations: [
-    ListaComponent,
-    FormularioComponent
-  ],
+  declarations: [ListaComponent, FormularioComponent],
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule.forChild(playersRoutes)
-  ]
+    RouterModule.forChild(playersRoutes),
+  ],
 })
 export class PlayersModule {}

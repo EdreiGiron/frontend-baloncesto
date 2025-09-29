@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { Players } from './players';
+import { PlayersService } from './players'; // Asegúrate que exporta PlayersService
 
-describe('Players', () => {
-  let service: Players;
+describe('PlayersService', () => {
+  let service: PlayersService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Players);
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+    }).compileComponents();
+
+    service = TestBed.inject(PlayersService);
   });
 
   it('should be created', () => {

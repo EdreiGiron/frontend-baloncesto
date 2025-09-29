@@ -1,6 +1,16 @@
 <div class="list-container">
-  <h2>Jugadores</h2>
-  <button routerLink="/players/nuevo" class="btn-primary">➕ Agregar jugador</button>
+  <header class="bar">
+    <h2>Jugadores</h2>
+    <button class="btn primary" (click)="nuevo()">+ Nuevo jugador</button>
+  </header>
+
+  <div class="filters">
+    <input type="text" [value]="termino" (input)="aplicarFiltro(($any($event.target)).value)"
+      placeholder="Buscar por nombre / posición / número" />
+    <button class="btn link" (click)="limpiar()">Limpiar</button>
+  </div>
+
+
 
   <table class="styled-table">
     <thead>
@@ -16,7 +26,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let j of jugadores">
+      <tr *ngFor="let j of vista">
         <td>{{ j.fullName }}</td>
         <td>{{ j.number }}</td>
         <td>{{ j.position }}</td>
@@ -25,9 +35,15 @@
         <td>{{ j.nationality }}</td>
         <td>{{ j.teamId }}</td>
         <td>
-          <button class="btn-small edit" (click)="editar(j.id!)">✏️ Editar</button>
-          <button class="btn-small delete" (click)="eliminar(j.id!)">🗑️ Eliminar</button>
+          <button class="btn-small edit" (click)="editar(j.id)">✏️ Editar</button>
+          <button class="btn-small delete" (click)="eliminar(j.id)">🗑️ Eliminar</button>
         </td>
+      </tr>
+      <tr *ngIf="!cargando() && vista.length === 0">
+        <td colspan="8">Sin resultados</td>
+      </tr>
+      <tr *ngIf="cargando()">
+        <td colspan="8">Cargando…</td>
       </tr>
     </tbody>
   </table>

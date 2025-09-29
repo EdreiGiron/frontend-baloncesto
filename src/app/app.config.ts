@@ -1,16 +1,20 @@
-import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
+// app.config.ts
+import { ApplicationConfig, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { FormsModule } from '@angular/forms';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/auth.interceptor';
 
+// 👇 añade estos
+import { FormsModule } from '@angular/forms';
+import { PlayersModule } from './features/players/players-module';
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection(),
+    provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(),
-    importProvidersFrom(FormsModule),   // 👈 este es el correcto
     provideHttpClient(withInterceptors([authInterceptor])),
+
+    importProvidersFrom(FormsModule, PlayersModule),
   ],
 };
