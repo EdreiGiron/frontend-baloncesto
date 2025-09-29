@@ -26,13 +26,18 @@
       <span class="period">Q{{ quarter() }}</span>
       <span class="run" [class.playing]="running()">{{ running() ? '▶' : '⏸' }}</span>
     </div>
-
   </header>
 
   <main class="panels">
+    <!-- HOME -->
     <div class="team left">
+      <div class="team-logo" #homeLogoBox>
+        @if (homeLogo()) {
+        <img [src]="homeLogo()" alt="Logo {{ home().name }}" />
+        }
+      </div>
       <div class="team-name">{{ home().name }}</div>
-      <div class="big-score">{{ home().score }}</div>
+      <div class="big-score" #homeScore>{{ home().score }}</div>
       <div class="meta">
         <span class="badge" [class.on]="bonusHome()">B</span>
         <span class="meta-item">Faltas: {{ home().fouls }}</span>
@@ -47,13 +52,18 @@
       </div>
     </div>
 
+    <!-- AWAY -->
     <div class="team right">
+      <div class="team-logo" #awayLogoBox>
+        @if (awayLogo()) {
+        <img [src]="awayLogo()" alt="Logo {{ away().name }}" />
+        }
+      </div>
       <div class="team-name">{{ away().name }}</div>
-      <div class="big-score">{{ away().score }}</div>
+      <div class="big-score" #awayScore>{{ away().score }}</div>
       <div class="meta">
         <span class="badge" [class.on]="bonusAway()">B</span>
         <span class="meta-item">Faltas: {{ away().fouls }}</span>
       </div>
     </div>
   </main>
-</section>

@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { GameStore, TeamKey } from '../../../core/game-store';
 import { RealtimeService } from '../../../core/realtime.service';
 import { ApiService } from '../../../core/api.service';
+import { TeamsService, Team } from '../../../core/teams.service';
+import { PlayersService, Player } from '../../players/players';
 
 @Component({
   standalone: true,
@@ -15,11 +17,21 @@ import { ApiService } from '../../../core/api.service';
 export class ControlPanelComponent implements OnInit, OnDestroy {
   public s = inject(GameStore);
 
-  constructor(private rt: RealtimeService, private api: ApiService) { }
+  constructor(
+    private rt: RealtimeService,
+    private api: ApiService,
+    private teamsSvc: TeamsService,
+    private playersSvc: PlayersService,
+  ) { }
 
-  ngOnInit() { void this.rt.connect('http://localhost:8080'); }
+  ngOnInit() {
+    void this.rt.connect('http://localhost:8080');
+    this.cargarEquipos();
+    this.cargarJugadores();
+  }
   ngOnDestroy() { this.stopTimeoutSync(); void this.rt.disconnect(); }
 
+  // Store
   home = this.s.home; away = this.s.away;
   quarter = this.s.quarter; timeLabel = this.s.timeLabel;
   bonusHome = this.s.bonusHome; bonusAway = this.s.bonusAway;
@@ -31,16 +43,96 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
   minutes = 10;
 
   private _lastQuarter = this.s.quarter();
-
   private quarterSyncEffect = effect(() => {
     const q = this.s.quarter();
-    if (q !== this._lastQuarter) {
-      this._lastQuarter = q;
-      void this.rt.pushState();
-    }
+    if (q !== this._lastQuarter) { this._lastQuarter = q; void this.rt.pushState(); }
   });
 
-  // --- Acciones + push ---
+  // --- Datos desde BD ---
+  teams = signal<Team[]>([]);
+  players = signal<Player[]>([]);
+
+  homeTeamId = signal<number | null>(null);
+  awayTeamId = signal<number | null>(null);
+
+  homeLogo = computed(() => this.teams().find(t => t.id === this.homeTeamId())?.logoUrl || '');
+  awayLogo = computed(() => this.teams().find(t => t.id === this.awayTeamId())?.logoUrl || '');
+
+  homePlayers = computed(() => {
+    const id = this.homeTeamId(); return id == null ? [] : this.players().filter(p => p.teamId === id);
+  });
+  awayPlayers = computed(() => {
+    const id = this.awayTeamId(); return id == null ? [] : this.players().filter(p => p.teamId === id);
+  });
+
+  homeRoster = signal<number[]>([]);
+  awayRoster = signal<number[]>([]);
+
+  private cargarEquipos() {
+    this.teamsSvc.getAll().subscribe({
+      next: data => this.teams.set(data ?? []),
+      error: () => this.teams.set([]),
+    });
+  }
+  private cargarJugadores() {
+    this.playersSvc.getPlayers().subscribe({
+      next: (data) => {
+        const arr = data ?? [];
+
+        const seen = new Set<number | string>();
+        const unique = arr.filter(p => {
+          const key = (p.id ?? `${p.fullName}|${p.number}|${p.teamId}`);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        unique.sort((a, b) =>
+          (a.teamId - b.teamId) || (a.number - b.number) || a.fullName.localeCompare(b.fullName)
+        );
+
+        this.players.set(unique);
+      },
+      error: () => this.players.set([]),
+    });
+  }
+
+
+  onSelectTeam(side: TeamKey, teamId: number | null) {
+    if (side === 'home') this.homeTeamId.set(teamId); else this.awayTeamId.set(teamId);
+
+    const team = this.teams().find(t => t.id === teamId!);
+    if (team) {
+      if (side === 'home') this.s.setTeamName('home', team.name);
+      else this.s.setTeamName('away', team.name);
+      void this.rt.pushState();
+    }
+
+    if (side === 'home') this.homeRoster.set([]); else this.awayRoster.set([]);
+  }
+
+  // FIX: no usar variable llamada "set". Usa rosterSig y su setter .set(...)
+  toggleRoster(side: TeamKey, playerId: number, checked: boolean) {
+    const rosterSig = side === 'home' ? this.homeRoster : this.awayRoster;
+    const current = rosterSig();
+    const next = checked
+      ? Array.from(new Set([...current, playerId]))
+      : current.filter(id => id !== playerId);
+    rosterSig.set(next);
+  }
+
+  selectAll(side: TeamKey) {
+    const allIds = (side === 'home' ? this.homePlayers() : this.awayPlayers())
+      .map(p => p.id!)
+      .filter((x): x is number => typeof x === 'number');
+    (side === 'home' ? this.homeRoster : this.awayRoster).set(allIds);
+  }
+
+  clearRoster(side: TeamKey) {
+    (side === 'home' ? this.homeRoster : this.awayRoster).set([]);
+  }
+
+  // Acciones + push
   setNames(h: string, a: string) { this.s.setTeamName('home', h); this.s.setTeamName('away', a); void this.rt.pushState(); }
   add(t: TeamKey, p: 1 | 2 | 3) { this.s.addPoints(t, p); void this.rt.pushState(); }
   sub(t: TeamKey) { this.s.removePoint(t); void this.rt.pushState(); }
@@ -63,11 +155,15 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
     this.startTimeoutSync();
   }
 
-  resetAll() { this.s.resetAll(); void this.rt.pushState(); }
+  resetAll() {
+    this.s.resetAll();
+    this.homeTeamId.set(null); this.awayTeamId.set(null);
+    this.homeRoster.set([]); this.awayRoster.set([]);
+    void this.rt.pushState();
+  }
 
-  // --- Sync de Timeout cada 1s ---
+  // Sync timeout
   private timeoutSyncId: any = null;
-
   private startTimeoutSync() {
     this.stopTimeoutSync();
     this.timeoutSyncId = setInterval(() => {
@@ -79,25 +175,23 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
     if (this.timeoutSyncId) { clearInterval(this.timeoutSyncId); this.timeoutSyncId = null; }
   }
 
-  // --- Guardar partido---
+  // Guardar partido
   saveGame() {
     const dto = {
       matchId: 'demo-001',
-      home: this.s.home(),
-      away: this.s.away(),
+      home: { ...this.s.home(), teamId: this.homeTeamId(), roster: this.homeRoster() },
+      away: { ...this.s.away(), teamId: this.awayTeamId(), roster: this.awayRoster() },
       quarter: this.s.quarter(),
       quarterDurationMs: this.s.quarterDurationMs(),
       timeLeftMs: this.s.getTimeLeftMs(),
       possession: this.s.possession()
     };
     this.api.save(dto).subscribe(() => alert('Partido guardado'));
-
   }
 
   showQuarterToast = signal(false);
   endedQuarterCtl = signal<1 | 2 | 3 | 4>(1);
 
-  //CAMBIO DE Q1 A Q3 MANUAL O AUTO PARA MOSTRAR
   private _prevQuarterCtl = this.s.quarter();
   private quarterToastEffect = effect(() => {
     const q = this.s.quarter();
@@ -109,7 +203,7 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
     }
     this._prevQuarterCtl = q;
   });
-  // FIN DEL PARTIDO
+
   private _prevTlCtl = this.s.getTimeLeftMs();
   private finalToastEffect = effect(() => {
     const tl = this.s.getTimeLeftMs();
@@ -121,5 +215,4 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
     }
     this._prevTlCtl = tl;
   });
-
 }

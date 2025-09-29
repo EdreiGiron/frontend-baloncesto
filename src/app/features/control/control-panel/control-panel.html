@@ -2,7 +2,7 @@
   <h2>Control del Partido</h2>
 
   <div class="grid">
-    <!-- Bloque reloj -->
+    <!-- Reloj -->
     <fieldset>
       <legend>Reloj</legend>
       <div class="clock">
@@ -13,15 +13,14 @@
           <button (click)="resetClock()">Reiniciar</button>
         </div>
         @if (s.timeoutLeftMs() > 0) {
-        <div class="row">
-          <strong>EN TIME-OUT:</strong>
-          <span class="pill">
-            {{ s.timeoutBy() === 'home' ? homeName() : (s.timeoutBy() === 'away' ? awayName() : '') }}
-          </span>
-          <span class="pill">{{ timeoutLabel() }}</span>
-        </div>
+          <div class="row">
+            <strong>EN TIME-OUT:</strong>
+            <span class="pill">
+              {{ s.timeoutBy() === 'home' ? homeName() : (s.timeoutBy() === 'away' ? awayName() : '') }}
+            </span>
+            <span class="pill">{{ timeoutLabel() }}</span>
+          </div>
         }
-
 
         <div class="row">
           <label>Minutos por cuarto:
@@ -35,11 +34,10 @@
           <button (click)="callTO('away',30)">Timeout {{ awayName() }} 30s ({{away().timeouts30}})</button>
           <button (click)="callTO('away',60)">Timeout {{ awayName() }} 60s ({{away().timeouts60}})</button>
         </div>
-
       </div>
     </fieldset>
 
-    <!-- Bloque período / posesión -->
+    <!-- Período / Posesión -->
     <fieldset>
       <legend>Período / Posesión</legend>
       <div class="row">
@@ -59,20 +57,45 @@
       <div class="row">
         <strong>Período actual:</strong> Q{{ quarter() }}
       </div>
-
     </fieldset>
 
-    <!-- Bloque equipos -->
+    <!-- Equipos (select + logo) -->
     <fieldset>
       <legend>Equipos</legend>
-      <div class="row">
-        <label>Local: <input #hn type="text" [value]="home().name" (change)="setNames(hn.value, an.value)" /></label>
-        <label>Visita: <input #an type="text" [value]="away().name" (change)="setNames(hn.value, an.value)" /></label>
+
+      <div class="row" style="gap:16px; align-items:center; flex-wrap:wrap;">
+        <label>
+          Local:
+          <select
+            (change)="onSelectTeam('home', $any($event.target).value ? +$any($event.target).value : null)">
+            <option value="">-- Seleccionar --</option>
+            @for (t of teams(); track t.id) {
+              <option [value]="t.id">{{ t.name }}</option>
+            }
+          </select>
+        </label>
+        @if (homeLogo()) {
+          <img [src]="homeLogo()" alt="Logo Local" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #ddd;">
+        }
+
+        <label>
+          Visita:
+          <select
+            (change)="onSelectTeam('away', $any($event.target).value ? +$any($event.target).value : null)">
+            <option value="">-- Seleccionar --</option>
+            @for (t of teams(); track t.id) {
+              <option [value]="t.id">{{ t.name }}</option>
+            }
+          </select>
+        </label>
+        @if (awayLogo()) {
+          <img [src]="awayLogo()" alt="Logo Visita" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #ddd;">
+        }
       </div>
 
       <div class="score-grid">
         <div class="team">
-          <h4>{{ home().name }} | Faltas: {{ home().fouls }} <span class="badge" [class.on]="bonusHome()">B</span></h4>
+          <h4>{{ homeName() }} | Faltas: {{ home().fouls }} <span class="badge" [class.on]="bonusHome()">B</span></h4>
           <div class="row">
             <button class="neg" (click)="sub('home')">-1</button>
             <div class="display">{{ home().score }}</div>
@@ -86,7 +109,7 @@
         </div>
 
         <div class="team">
-          <h4>{{ away().name }} | Faltas: {{ away().fouls }} <span class="badge" [class.on]="bonusAway()">B</span></h4>
+          <h4>{{ awayName() }} | Faltas: {{ away().fouls }} <span class="badge" [class.on]="bonusAway()">B</span></h4>
           <div class="row">
             <button class="neg" (click)="sub('away')">-1</button>
             <div class="display">{{ away().score }}</div>
@@ -99,18 +122,77 @@
           </div>
         </div>
       </div>
+
       <button (click)="resetFouls()">Reiniciar faltas</button>
     </fieldset>
+
+    <!-- Roster -->
+    <fieldset>
+      <legend>Roster de Jugadores</legend>
+
+      <div class="row" style="align-items:flex-start; gap:24px; flex-wrap:wrap;">
+        <!-- Local -->
+        <div style="min-width:280px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="margin:0;">{{ homeName() }}</h4>
+            <div>
+              <button (click)="selectAll('home')">Todos</button>
+              <button (click)="clearRoster('home')">Limpiar</button>
+            </div>
+          </div>
+          <div class="roster-list" style="margin-top:8px; max-height:260px; overflow:auto; border:1px solid #e3e3e3; border-radius:6px; padding:8px;">
+            @for (p of homePlayers(); track p.id) {
+              <label style="display:block; padding:4px 0;">
+                <input
+                  type="checkbox"
+                  [checked]="homeRoster().includes(p.id!)"
+                  (change)="toggleRoster('home', p.id!, $any($event.target).checked)"
+                />
+                #{{ p.number }} · {{ p.fullName }} <small style="opacity:.7">({{ p.position }})</small>
+              </label>
+            }
+            @if (homePlayers().length === 0) {
+              <div style="opacity:.7; font-style:italic;">No hay jugadores para este equipo.</div>
+            }
+          </div>
+        </div>
+
+        <!-- Visita -->
+        <div style="min-width:280px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="margin:0;">{{ awayName() }}</h4>
+            <div>
+              <button (click)="selectAll('away')">Todos</button>
+              <button (click)="clearRoster('away')">Limpiar</button>
+            </div>
+          </div>
+          <div class="roster-list" style="margin-top:8px; max-height:260px; overflow:auto; border:1px solid #e3e3e3; border-radius:6px; padding:8px;">
+            @for (p of awayPlayers(); track p.id) {
+              <label style="display:block; padding:4px 0;">
+                <input
+                  type="checkbox"
+                  [checked]="awayRoster().includes(p.id!)"
+                  (change)="toggleRoster('away', p.id!, $any($event.target).checked)"
+                />
+                #{{ p.number }} · {{ p.fullName }} <small style="opacity:.7">({{ p.position }})</small>
+              </label>
+            }
+            @if (awayPlayers().length === 0) {
+              <div style="opacity:.7; font-style:italic;">No hay jugadores para este equipo.</div>
+            }
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
     <button class="danger full" (click)="resetAll()">Reiniciar Partido</button>
     <button (click)="saveGame()">Guardar partido</button>
   </div>
-  @if (showQuarterToast()) {
-  <div class="toast-qr">
-    <strong>
-      {{ endedQuarterCtl() === 4 ? 'Fin del partido' : ('Fin Q' + endedQuarterCtl()) }}
-    </strong>
-    <span> · Faltas reiniciadas</span>
-  </div>
-  }
 
+  @if (showQuarterToast()) {
+    <div class="toast-qr">
+      <strong>{{ endedQuarterCtl() === 4 ? 'Fin del partido' : ('Fin Q' + endedQuarterCtl()) }}</strong>
+      <span> · Faltas reiniciadas</span>
+    </div>
+  }
 </section>
