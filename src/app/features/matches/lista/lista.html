@@ -1,0 +1,30 @@
+<div class="container">
+  <h2>📅 Lista de Partidos</h2>
+  <button class="btn" routerLink="/matches/nuevo">➕ Nuevo Partido</button>
+
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Local</th>
+        <th>Visitante</th>
+        <th>Marcador</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of matches">
+        <td>{{ m.matchDate | date:'short' }}</td>
+        <td>{{ m.homeTeam?.name }}</td>
+        <td>{{ m.awayTeam?.name }}</td>
+        <td>
+          {{ m.homeScore ?? '-' }} - {{ m.awayScore ?? '-' }}
+        </td>
+        <td>
+          <button class="btn edit" (click)="editar(m.id!)">✏ Editar</button>
+          <button class="btn delete" (click)="eliminar(m.id!)">🗑 Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

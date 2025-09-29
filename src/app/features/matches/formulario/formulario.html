@@ -1,0 +1,25 @@
+<div class="container">
+  <h2>{{ id ? '✏ Editar Partido' : '➕ Nuevo Partido' }}</h2>
+
+  <form (ngSubmit)="guardar()">
+    <label>Fecha y Hora</label>
+    <input type="datetime-local" [(ngModel)]="match.matchDate" name="matchDate" required />
+
+    <label>Equipo Local</label>
+    <input type="number" [(ngModel)]="match.homeTeamId" name="homeTeamId" placeholder="ID Equipo Local" required />
+
+    <label>Equipo Visitante</label>
+    <input type="number" [(ngModel)]="match.awayTeamId" name="awayTeamId" placeholder="ID Equipo Visitante" required />
+
+    <label>Marcador Local</label>
+    <input type="number" [(ngModel)]="match.homeScore" name="homeScore" />
+
+    <label>Marcador Visitante</label>
+    <input type="number" [(ngModel)]="match.awayScore" name="awayScore" />
+
+    <div class="form-actions">
+      <button type="submit" class="btn save">💾 Guardar</button>
+<button type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+</div>
