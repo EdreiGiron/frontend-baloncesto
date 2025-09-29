@@ -1,0 +1,21 @@
+<div class="container">
+  <h2>📖 Historial de Partidos</h2>
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Local</th>
+        <th>Visitante</th>
+        <th>Marcador Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let h of historial">
+        <td>{{ h.matchDate | date:'mediumDate' }}</td>
+        <td>{{ h.homeTeam?.name }}</td>
+        <td>{{ h.awayTeam?.name }}</td>
+        <td>{{ h.homeScore }} - {{ h.awayScore }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
