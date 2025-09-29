@@ -1,5 +1,17 @@
-<nav *ngIf="showNavbar" class="navbar">
-  <a routerLink="/display">Tablero</a>
-  <a routerLink="/control">Control</a>
+<nav *ngIf="showNavbar()" class="navbar">
+  <div class="left">
+    <a routerLink="/display" routerLinkActive="active">Tablero</a>
+
+    <!-- Solo Admin -->
+    <a *ngIf="isAdmin()" routerLink="/control"  routerLinkActive="active">Control</a>
+    <a *ngIf="isAdmin()" routerLink="/equipos"  routerLinkActive="active">Equipos</a>
+    <a *ngIf="isAdmin()" routerLink="/jugadores" routerLinkActive="active">Jugadores</a>
+  </div>
+
+  <div class="right" *ngIf="isLoggedIn()">
+    <span class="user" *ngIf="username() as u">Hola, {{ u }}</span>
+    <button class="link" (click)="logout()">Cerrar sesión</button>
+  </div>
 </nav>
+
 <router-outlet></router-outlet>

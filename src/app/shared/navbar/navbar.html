@@ -1,0 +1,20 @@
+<!-- Si está en /login, no renderiza nada -->
+<nav class="nav" *ngIf="!hidden()">
+  <div class="brand">Marcador</div>
+
+  <ul class="links">
+    <!-- Siempre visibles si hay sesión -->
+    <li *ngIf="logged()">
+      <a routerLink="/display" routerLinkActive="active">Display</a>
+    </li>
+
+    <!-- Solo Admin -->
+    <li *ngIf="role() === 'Admin'"><a routerLink="/control"  routerLinkActive="active">Control</a></li>
+    <li *ngIf="role() === 'Admin'"><a routerLink="/equipos"  routerLinkActive="active">Equipos</a></li>
+    <li *ngIf="role() === 'Admin'"><a routerLink="/jugadores" routerLinkActive="active">Jugadores</a></li>
+  </ul>
+
+  <div class="right">
+    <button class="btn link" *ngIf="logged()" (click)="logout()">Cerrar sesión</button>
+  </div>
+</nav>

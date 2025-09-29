@@ -1,0 +1,80 @@
+<section class="teams">
+    <header class="bar">
+        <h2>Equipos</h2>
+        <button class="btn primary" (click)="openCreate()" *ngIf="isAdmin()">+ Nuevo equipo</button>
+    </header>
+
+    <!-- Filtros -->
+    <div class="filters">
+        <input #q type="text" [value]="term()" (input)="applyFilter(q.value)"
+            placeholder="Buscar por nombre o ciudad" />
+
+        <button class="btn link" *ngIf="term()" (click)="clear()">Limpiar</button>
+    </div>
+
+    <!-- Formulario inline (crear / editar) -->
+    <div class="card" *ngIf="showForm()">
+        <h3>{{ editingId() == null ? 'Crear equipo' : 'Editar equipo' }}</h3>
+
+        <div class="form">
+            <label>
+                <span>Nombre</span>
+                <input [(ngModel)]="form.name" placeholder="Ej. Bulls" />
+            </label>
+
+            <label>
+                <span>Ciudad</span>
+                <input [(ngModel)]="form.city" placeholder="Ej. Chicago" />
+            </label>
+
+            <label>
+                <span>Logo (URL)</span>
+                <input [(ngModel)]="form.logoUrl" placeholder="https://..." />
+            </label>
+        </div>
+
+        <div class="error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+        <div class="actions">
+            <button class="btn" (click)="cancel()" [disabled]="saving()">Cancelar</button>
+            <button class="btn primary" (click)="save()" [disabled]="saving()">
+                {{ saving() ? 'Guardando...' : (editingId() == null ? 'Crear' : 'Guardar cambios') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Logo</th>
+                <th>Nombre</th>
+                <th>Ciudad</th>
+                <th class="center">Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr *ngIf="cargando()">
+                <td colspan="4" class="center">Cargando...</td>
+            </tr>
+
+            <tr *ngFor="let t of view">
+                <td>
+                    <img *ngIf="t.logoUrl" [src]="t.logoUrl" alt="logo" class="logo">
+                </td>
+                <!-- 👇 aseguramos name / city (no nombre/ciudad) -->
+                <td>{{ t.name }}</td>
+                <td>{{ t.city }}</td>
+                <td class="center">
+                    <button class="icon" title="Editar" (click)="openEdit(t)" *ngIf="isAdmin()">✏️</button>
+                    <button class="icon" title="Eliminar" (click)="remove(t)" *ngIf="isAdmin()">🗑️</button>
+                </td>
+            </tr>
+
+            <tr *ngIf="!cargando() && !view.length">
+                <td colspan="4" class="center">Sin resultados</td>
+            </tr>
+        </tbody>
+    </table>
+</section>

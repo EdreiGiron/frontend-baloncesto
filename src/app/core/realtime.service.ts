@@ -1,25 +1,37 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { GameStore } from './game-store';
+import { AuthService } from './auth.service';
 
-const DEBUG = false; 
+const DEBUG = false;
 
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
   private hub?: signalR.HubConnection;
   private matchId = 'demo-001'; 
 
-  constructor(private store: GameStore) {}
+  constructor(private store: GameStore, private auth: AuthService) {}
 
-  async connect(baseUrl = 'http://localhost:5000') {
+  async connect(baseUrl = 'http://localhost:8080') {
     if (this.hub) return;
+
+    const hubUrl = `${baseUrl}/hub/score`;
+
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl(`${baseUrl}/hub/score`, { withCredentials: true })
+      .withUrl(hubUrl, {
+        // En websockets, el token va en la querystring. accessTokenFactory es la forma correcta.
+        accessTokenFactory: () => this.auth.getToken() ?? '',
+        withCredentials: true
+      })
       .withAutomaticReconnect()
       .build();
 
+    // Logs útiles de reconexión (opcionales)
+    this.hub.onreconnecting(err => DEBUG && console.warn('[hub] reconnecting...', err));
+    this.hub.onreconnected(id => DEBUG && console.info('[hub] reconnected:', id));
+    this.hub.onclose(err => DEBUG && console.warn('[hub] closed', err));
 
-    // Handler de estado
+    // ---- Handlers del estado que ya tenías ----
     this.hub.on('state', (state: any) => {
       DEBUG && console.log('[recv]', state);
 
@@ -45,14 +57,19 @@ export class RealtimeService {
       else this.store.pause();
     });
 
-    await this.hub.start();
+    // Conecta + únete al partido
+    await this.hub.start().catch(err => {
+      DEBUG && console.error('[hub] start error', err);
+      throw err;
+    });
+
     await this.hub.invoke('JoinMatch', this.matchId);
     DEBUG && console.log('[hub] connected and joined', this.matchId);
   }
 
   async disconnect() {
     if (!this.hub) return;
-    await this.hub.invoke('LeaveMatch', this.matchId);
+    try { await this.hub.invoke('LeaveMatch', this.matchId); } catch { /* noop */ }
     await this.hub.stop();
     this.hub = undefined;
   }

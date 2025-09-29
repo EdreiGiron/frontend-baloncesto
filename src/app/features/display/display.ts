@@ -13,7 +13,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
   private s = inject(GameStore);
   constructor(private rt: RealtimeService) { }
 
-  ngOnInit() { void this.rt.connect('http://localhost:5000'); }
+  ngOnInit() { void this.rt.connect('http://localhost:8080'); }
   ngOnDestroy() { void this.rt.disconnect(); }
 
   home = this.s.home; away = this.s.away;

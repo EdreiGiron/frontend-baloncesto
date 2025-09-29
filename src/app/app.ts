@@ -1,24 +1,35 @@
-import { Component } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { AuthService } from './core/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
-  styleUrls: ['./app.scss']
+  styleUrls: ['./app.scss'],
 })
 export class AppComponent {
-  showNavbar = true;
+  private router = inject(Router);
+  private auth = inject(AuthService);
 
-  constructor(private router: Router) {
+  private currentUrl = signal(this.router.url);
+
+  constructor() {
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.showNavbar = !event.url.startsWith('/login');
-      });
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: any) => this.currentUrl.set(e.urlAfterRedirects ?? e.url));
   }
+
+  // Navbar oculto en /login
+  showNavbar = computed(() => !this.currentUrl().startsWith('/login'));
+
+  // Sesión / rol (usados en app.html)
+  isLoggedIn = () => this.auth.isLoggedIn();
+  isAdmin    = () => this.auth.getRole() === 'Admin';
+  username   = () => this.auth.getUsername();
+
+  logout() { this.auth.logout(); }
 }

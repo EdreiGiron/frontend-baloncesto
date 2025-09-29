@@ -17,7 +17,7 @@ export class ControlPanelComponent implements OnInit, OnDestroy {
 
   constructor(private rt: RealtimeService, private api: ApiService) { }
 
-  ngOnInit() { void this.rt.connect('http://localhost:5000'); }
+  ngOnInit() { void this.rt.connect('http://localhost:8080'); }
   ngOnDestroy() { this.stopTimeoutSync(); void this.rt.disconnect(); }
 
   home = this.s.home; away = this.s.away;

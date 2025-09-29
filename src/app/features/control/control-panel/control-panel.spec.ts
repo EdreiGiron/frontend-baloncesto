@@ -1,18 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ControlPanelComponent } from './control-panel';
 
-import { ControlPanel } from './control-panel';
-
-describe('ControlPanel', () => {
-  let component: ControlPanel;
-  let fixture: ComponentFixture<ControlPanel>;
+describe('ControlPanelComponent', () => {
+  let component: ControlPanelComponent;
+  let fixture: ComponentFixture<ControlPanelComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ControlPanel]
-    })
-    .compileComponents();
+      imports: [ControlPanelComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(ControlPanel);
+    fixture = TestBed.createComponent(ControlPanelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
