@@ -93,4 +93,8 @@ El sistema sigue una arquitectura cliente-servidor:
 ## 9. Integrantes
 - Edrei Andrés Girón Leonardo / 7690-21-218
 - Edward Alexander Aguilar Flores / 7690-21-7651
+- Diego Fernando Velasquez Pichilla / 7690-16-3882
 ---
+
+
+
