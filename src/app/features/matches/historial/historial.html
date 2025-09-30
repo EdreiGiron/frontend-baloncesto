@@ -1,21 +1,28 @@
 <div class="container">
   <h2>📖 Historial de Partidos</h2>
-  <table class="styled-table">
+
+  <table class="styled-table" *ngIf="historial.length > 0; else noData">
     <thead>
       <tr>
         <th>Fecha</th>
         <th>Local</th>
         <th>Visitante</th>
-        <th>Marcador Final</th>
+        <th>Marcador</th>
+        <th>Cuarto</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let h of historial">
-        <td>{{ h.matchDate | date:'mediumDate' }}</td>
-        <td>{{ h.homeTeam?.name }}</td>
-        <td>{{ h.awayTeam?.name }}</td>
-        <td>{{ h.homeScore }} - {{ h.awayScore }}</td>
+        <td>{{ h.savedAtUtc | date:'short' }}</td>
+        <td>{{ h.home?.name }}</td>
+        <td>{{ h.away?.name }}</td>
+        <td>{{ h.home?.score }} - {{ h.away?.score }}</td>
+        <td>{{ h.quarter }}</td>
       </tr>
     </tbody>
   </table>
+
+  <ng-template #noData>
+    <p>No hay partidos guardados todavía.</p>
+  </ng-template>
 </div>
